@@ -1,0 +1,29 @@
+defaults:
+  - _self_
+
+name: object_detection
+docker_image: gcr.io/my-project/object-detection:latest
+entrypoint:
+  - pixi
+  - run
+  - train
+
+overrides: ""
+
+data_assets:
+    train_data:
+      bucket_name: ego-training-data
+      relative_path: ???
+      param_name: data.train_path
+    val_data:
+      bucket_name: ego-training-data
+      relative_path: ???
+      param_name: data.val_path
+    test_data:
+      bucket_name: ego-training-data
+      relative_path: ???
+      param_name: data.test_path
+    output_data:
+      bucket_name: ego-training-data
+      relative_path: ???
+      param_name: hydra.run.dir

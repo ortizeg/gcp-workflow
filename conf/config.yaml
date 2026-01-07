@@ -1,0 +1,9 @@
+defaults:
+  - infra: vertex
+  - task: object_detection
+  - _self_
+
+hydra:
+  run:
+    dir: .  # Do not create working directories for this launcher script
+  output_subdir: null

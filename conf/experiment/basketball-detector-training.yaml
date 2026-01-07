@@ -1,0 +1,39 @@
+# @package _global_
+
+defaults:
+  - override /infra: vertex
+  - override /task: object_detection
+
+infra:
+  project: api-project-562713517696
+  service_account: 562713517696-compute@developer.gserviceaccount.com # Compute Engine default
+  job_name: basketball-detector-training
+  staging_bucket: gs://deep-ego-model-training
+  location: us-east1
+  # machine_type: n1-standard-8
+  # accelerator_type: NVIDIA_TESLA_T4
+  machine_type: g2-standard-8
+  accelerator_type: NVIDIA_L4
+
+task:
+  docker_image: us-docker.pkg.dev/api-project-562713517696/object-detection-training/object-detection-training:latest
+
+  data_assets:
+    train_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/train
+      param_name: data.train_path
+    val_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/valid
+      param_name: data.val_path
+    test_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/test
+      param_name: data.test_path
+    output_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/logs/rfdetrs-v2-basketball-player-training
+      param_name: hydra.run.dir
+
+  # overrides: "model=yolox_s"
