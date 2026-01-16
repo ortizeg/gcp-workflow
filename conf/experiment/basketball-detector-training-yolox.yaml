@@ -7,7 +7,7 @@ defaults:
 infra:
   project: api-project-562713517696
   service_account: 562713517696-compute@developer.gserviceaccount.com # Compute Engine default
-  job_name: basketball-detector-training-rfdetr-small
+  job_name: basketball-detector-training-yolox-small
   staging_bucket: gs://deep-ego-model-training
   location: us-east1
   # machine_type: n1-standard-8
@@ -36,4 +36,4 @@ task:
       relative_path: ego-training-data/basketball-data/logs/
       param_name: hydra.run.dir
 
-  overrides: "--config-name train"
+  overrides: "--config-name train_yolox"
