@@ -54,11 +54,13 @@ def main(cfg: DictConfig):
                 break
 
     # 5. Submit Job
-    display_name = (
+    job_name_val = (
         cfg.infra.job_name
         if hasattr(cfg.infra, "job_name") and cfg.infra.job_name
         else f"{cfg.task.name}-job"
     )
+
+    display_name = job_name_val
 
     # Append timestamp if it's the default name or if user wants uniqueness by default
     # But for simplicity, let's always append to the display name unless it's already
@@ -66,14 +68,20 @@ def main(cfg: DictConfig):
     if timestamp not in display_name:
         display_name = f"{display_name}-{timestamp}"
 
-    # Ensure output directory is unique by appending timestamp if it's the default
+    # Ensure output directory is unique by appending job_name and timestamp
     for asset in task.data_assets:
         if asset.name == "output_data":
-            if timestamp not in asset.relative_path:
+            # Append job_name and timestamp to the path
+            if job_name_val not in asset.relative_path:
+                asset.relative_path = (
+                    f"{asset.relative_path}/{job_name_val}/{timestamp}"
+                )
+            elif timestamp not in asset.relative_path:
                 asset.relative_path = f"{asset.relative_path}/{timestamp}"
-                logger.info(f"Updated output path to: {asset.relative_path}")
-                if asset.uri.startswith("gs://"):
-                    base_output_directory = {"output_uri_prefix": asset.uri}
+
+            logger.info(f"Updated output path to: {asset.relative_path}")
+            if asset.uri.startswith("gs://"):
+                base_output_directory = {"output_uri_prefix": asset.uri}
 
     job_id = vertex_client.submit_job(
         display_name=display_name,
