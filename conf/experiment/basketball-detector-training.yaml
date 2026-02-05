@@ -36,4 +36,4 @@ task:
       relative_path: ego-training-data/basketball-data/logs/
       param_name: hydra.run.dir
 
-  overrides: "--config-name train"
+  overrides: "--config-name train_basketball_rfdetr"
