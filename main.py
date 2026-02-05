@@ -32,6 +32,38 @@ def main(cfg: DictConfig):
 
     logger.info(f"Initializing task: {cfg.task.name}")
 
+    # Determine Job Name and Update Output Paths
+    job_name_val = (
+        cfg.infra.job_name
+        if hasattr(cfg.infra, "job_name") and cfg.infra.job_name
+        else f"{cfg.task.name}-job"
+    )
+
+    display_name = job_name_val
+
+    # Append timestamp to the display name unless it's already unique
+    if timestamp not in display_name:
+        display_name = f"{display_name}-{timestamp}"
+
+    # Determine base output directory if available (for TensorBoard)
+    base_output_directory = None
+
+    # Ensure output directory is unique by appending job_name and timestamp
+    for asset in task.data_assets:
+        if asset.name == "output_data":
+            # Strip trailing slash if present to avoid double slashes
+            base_path = asset.relative_path.rstrip("/")
+
+            # Append job_name and timestamp to the path
+            if job_name_val not in base_path:
+                asset.relative_path = f"{base_path}/{job_name_val}/{timestamp}"
+            elif timestamp not in base_path:
+                asset.relative_path = f"{base_path}/{timestamp}"
+
+            logger.info(f"Updated output path to: {asset.relative_path}")
+            if asset.uri.startswith("gs://"):
+                base_output_directory = {"output_uri_prefix": asset.uri}
+
     # 3. Create Job Specification
     worker_pool_specs = [
         vertex_client.create_worker_pool_spec(
