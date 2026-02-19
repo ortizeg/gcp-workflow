@@ -1,11 +1,11 @@
 project: my-gcp-project
 job_name: null
 service_account: null  # Service account email to run the job
-location: us-central1
+location: us-east1
 staging_bucket: gs://my-staging-bucket
 experiment: object-detection-exp
-machine_type: n1-standard-8
-accelerator_type: NVIDIA_TESLA_T4
+machine_type: g2-standard-8
+accelerator_type: NVIDIA_L4
 accelerator_count: 1
-tensorboard_resource_name: "projects/deep-ego/locations/us-central1/tensorboards/6022053772631474176"
+tensorboard_resource_name: null
 dry_run: true

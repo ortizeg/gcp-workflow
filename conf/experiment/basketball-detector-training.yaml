@@ -10,8 +10,6 @@ infra:
   job_name: basketball-detector-training-rfdetr-small
   staging_bucket: gs://deep-ego-model-training
   location: us-east1
-  # machine_type: n1-standard-8
-  # accelerator_type: NVIDIA_TESLA_T4
   machine_type: g2-standard-8
   accelerator_type: NVIDIA_L4
 
@@ -36,4 +34,15 @@ task:
       relative_path: ego-training-data/basketball-data/logs/
       param_name: hydra.run.dir
 
-  overrides: "--config-name train_basketball_rfdetr"
+  overrides: "--config-name train_basketball_rfdetr \
+    data.sampler.mode=manual \
+    +data.sampler.class_weights.player=0.1 \
+    +data.sampler.class_weights.number=0.1 \
+    +data.sampler.class_weights.referee=0.1 \
+    +data.sampler.class_weights.ball=0.5 \
+    +data.sampler.class_weights.ball-in-basket=0.5 \
+    +data.sampler.class_weights.rim=0.5 \
+    +data.sampler.class_weights.player-in-possession=40.0 \
+    +data.sampler.class_weights.player-jump-shot=50.0 \
+    +data.sampler.class_weights.player-layup-dunk=100.0 \
+    +data.sampler.class_weights.player-shot-block=50.0"

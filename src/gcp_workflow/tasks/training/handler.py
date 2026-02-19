@@ -10,9 +10,11 @@ class TrainingTask(Task):
         self.cfg = cfg
         self._data_assets = []
 
-        # Parse data assets from config
+        # Parse data assets from config (skip null entries)
         if hasattr(cfg, "data_assets"):
             for name, asset_cfg in cfg.data_assets.items():
+                if asset_cfg is None:
+                    continue
                 self._data_assets.append(
                     DataAsset(
                         name=name,

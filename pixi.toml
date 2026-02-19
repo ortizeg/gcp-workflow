@@ -9,6 +9,7 @@ version = "0.1.0"
 test = "pytest"
 precommit = "pre-commit run --all-files"
 train-basketball-player = "python main.py +experiment=basketball-detector-training"
+train-basketball-player-yolox = "python main.py +experiment=basketball-detector-training-yolox"
 
 [dependencies]
 python = "3.9.*"
