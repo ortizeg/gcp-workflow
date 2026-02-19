@@ -1,0 +1,33 @@
+# @package _global_
+# ResNet18 + Focal Loss + default transforms (isolation: focal effect)
+
+defaults:
+  - override /infra: vertex
+  - override /task: object_detection
+
+infra:
+  project: api-project-562713517696
+  service_account: 562713517696-compute@developer.gserviceaccount.com
+  job_name: jersey-ocr-resnet18-focal-default
+  staging_bucket: gs://deep-ego-model-training
+  location: us-east1
+  machine_type: n1-standard-8
+  accelerator_type: NVIDIA_TESLA_T4
+
+task:
+  docker_image: us-docker.pkg.dev/api-project-562713517696/classifier-training/classifier-training:latest
+
+  data_assets:
+    data_root:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-jersey-numbers-ocr
+      param_name: data.data_root
+    output_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/classifier-training/logs/
+      param_name: hydra.run.dir
+
+  overrides: "--config-name train_jersey_ocr_resnet18 \
+    model.loss_name=focal \
+    model.focal_gamma=2.0 \
+    transforms=default"
