@@ -5,7 +5,7 @@ from loguru import logger
 from omegaconf import DictConfig
 
 from gcp_workflow.infra.vertex import VertexClient
-from gcp_workflow.tasks.object_detection.handler import ObjectDetectionTask
+from gcp_workflow.tasks.training.handler import TrainingTask
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
@@ -26,7 +26,7 @@ def main(cfg: DictConfig):
 
     # 2. Initialize Task Handler
     if cfg.task.name == "object_detection":
-        task = ObjectDetectionTask(cfg.task)
+        task = TrainingTask(cfg.task)
     else:
         raise NotImplementedError(f"Task {cfg.task.name} not implemented.")
 
