@@ -1,0 +1,43 @@
+# @package _global_
+# Augmentation sweep: NO-PIXELATE - ablation, pixelate disabled
+
+defaults:
+  - override /infra: vertex
+  - override /task: object_detection
+
+infra:
+  project: api-project-562713517696
+  service_account: 562713517696-compute@developer.gserviceaccount.com
+  job_name: jersey-r18-aug-sweep-no-pixelate
+  staging_bucket: gs://deep-ego-model-training
+  location: us-east1
+  tensorboard_resource_name: null
+  machine_type: g2-standard-8
+  accelerator_type: NVIDIA_L4
+
+task:
+  docker_image: us-docker.pkg.dev/api-project-562713517696/classifier-training/classifier-training:latest
+
+  data_assets:
+    train_data: null
+    val_data: null
+    test_data: null
+    data_root:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-jersey-numbers-ocr
+      param_name: data.data_root
+    output_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/classifier-training/logs/
+      param_name: hydra.run.dir
+
+  overrides: "--config-name train_jersey_ocr_resnet18 \
+    model=resnet18 \
+    model.loss_name=cross_entropy \
+    model.learning_rate=5e-4 \
+    model.label_smoothing=0.0 \
+    transforms=basketball_jersey_no_pixelate \
+    logging=none \
+    data.sampler.mode=disabled \
+    trainer.max_epochs=200 \
+    callbacks.early_stopping.patience=20"
