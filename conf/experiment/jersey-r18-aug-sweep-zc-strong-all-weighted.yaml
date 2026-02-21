@@ -38,6 +38,6 @@ task:
     model.label_smoothing=0.0 \
     transforms=basketball_jersey_zoom_choice_strong_all \
     logging=none \
-    data.sampler.mode=weighted \
+    data.sampler.mode=auto \
     trainer.max_epochs=200 \
     callbacks.early_stopping.patience=20"
