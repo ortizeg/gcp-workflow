@@ -1,0 +1,57 @@
+# @package _global_
+# SmolVLM2 LoRA fine-tuning for jersey number classification
+#
+# Zero-shot SmolVLM2-2.2B scored 57.3% top-1 vs ResNet18's 91.9%.
+# Fine-tune with LoRA (r=16, alpha=32) to improve accuracy.
+#
+# GPU: L4 (24GB VRAM) — bf16-mixed, gradient checkpointing, QLoRA 4-bit,
+# batch_size=4 x accumulate_grad_batches=4 = effective batch 16.
+# Image size reduced to 384 (162 tokens/image vs default 1377).
+#
+# Usage:
+#   pixi run train-jersey-ocr-smolvlm2                       # dry run
+#   pixi run train-jersey-ocr-smolvlm2 infra.dry_run=false   # real submit
+
+defaults:
+  - override /infra: vertex
+  - override /task: object_detection
+
+infra:
+  project: api-project-562713517696
+  service_account: 562713517696-compute@developer.gserviceaccount.com
+  job_name: jersey-ocr-smolvlm2-lora
+  staging_bucket: gs://deep-ego-model-training
+  location: us-east1
+  tensorboard_resource_name: null
+  machine_type: g2-standard-8
+  accelerator_type: NVIDIA_L4
+  accelerator_count: 1
+  dry_run: true
+
+task:
+  docker_image: us-docker.pkg.dev/api-project-562713517696/classifier-training/classifier-training:latest
+
+  entrypoint:
+    - pixi
+    - run
+    - "--environment"
+    - prod
+    - python
+    - "-m"
+    - classifier_training.train
+
+  data_assets:
+    train_data: null
+    val_data: null
+    test_data: null
+    data_root:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-jersey-numbers-ocr
+      param_name: data.data_root
+    output_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/classifier-training/logs/
+      param_name: hydra.run.dir
+
+  overrides: "--config-name train_jersey_ocr_smolvlm2 \
+    logging=none"
