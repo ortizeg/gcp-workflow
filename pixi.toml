@@ -10,6 +10,11 @@ test = "pytest"
 precommit = "pre-commit run --all-files"
 train-basketball-player = "python main.py +experiment=basketball-detector-training"
 train-basketball-player-yolox = "python main.py +experiment=basketball-detector-training-yolox"
+train-jersey-ocr = "python main.py +experiment=jersey-ocr-training"
+annotate-metadata = "python main.py +experiment=jersey-ocr-annotate-metadata"
+evaluate-jersey-ocr = "python main.py +experiment=jersey-ocr-evaluate"
+train-jersey-ocr-smolvlm2 = "python main.py +experiment=jersey-ocr-smolvlm2-training"
+train-jersey-ocr-smolvlm2-a100 = "python main.py +experiment=jersey-ocr-smolvlm2-a100"
 
 [dependencies]
 python = "3.9.*"
