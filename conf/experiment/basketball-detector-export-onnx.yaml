@@ -37,11 +37,14 @@ task:
     train_data: null
     val_data: null
     test_data: null
+    checkpoint:
+      bucket_name: deep-ego-model-training
+      relative_path: "ego-training-data/basketball-data/logs/basketball-detector-training-rfdetr-small/20260218_161423/checkpoints/epoch=80-val/mAP=0.4563.ckpt"
+      param_name: task.checkpoint_path
     output_data:
       bucket_name: deep-ego-model-training
       relative_path: ego-training-data/basketball-data/eval/onnx-export
       param_name: hydra.run.dir
 
   overrides: "--config-name train_basketball_rfdetr \
-    task=basketball_export_onnx_rfdetr_small \
-    task.checkpoint_path=/gcs/deep-ego-model-training/ego-training-data/basketball-data/logs/basketball-detector-training-rfdetr-small/checkpoints/best.ckpt"
+    task=basketball_export_onnx_rfdetr_small"
