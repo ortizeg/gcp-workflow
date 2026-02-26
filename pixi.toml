@@ -15,6 +15,10 @@ annotate-metadata = "python main.py +experiment=jersey-ocr-annotate-metadata"
 evaluate-jersey-ocr = "python main.py +experiment=jersey-ocr-evaluate"
 train-jersey-ocr-smolvlm2 = "python main.py +experiment=jersey-ocr-smolvlm2-training"
 train-jersey-ocr-smolvlm2-a100 = "python main.py +experiment=jersey-ocr-smolvlm2-a100"
+sweep-jersey-ocr-onnx = "python main.py +experiment=jersey-ocr-sweep-onnx"
+sweep-jersey-ocr-vlm = "python main.py +experiment=jersey-ocr-sweep-vlm"
+export-basketball-onnx = "python main.py +experiment=basketball-detector-export-onnx"
+eval-basketball-comparison = "python main.py +experiment=basketball-detector-eval-comparison"
 
 [dependencies]
 python = "3.9.*"

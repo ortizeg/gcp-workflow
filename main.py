@@ -2,7 +2,7 @@ import datetime
 
 import hydra
 from loguru import logger
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 from gcp_workflow.infra.vertex import VertexClient
 from gcp_workflow.tasks.training.handler import TrainingTask
@@ -64,7 +64,16 @@ def main(cfg: DictConfig):
             if asset.uri.startswith("gs://"):
                 base_output_directory = {"output_uri_prefix": asset.uri}
 
-    # 3. Create Job Specification
+    # 3. Resolve environment variables from config (if present)
+    env = None
+    if hasattr(cfg.task, "env") and cfg.task.env:
+        env = [OmegaConf.to_container(e, resolve=True) for e in cfg.task.env]
+        logger.info(
+            f"Passing {len(env)} env var(s) to container: "
+            f"{[e['name'] for e in env]}"
+        )
+
+    # 4. Create Job Specification
     worker_pool_specs = [
         vertex_client.create_worker_pool_spec(
             container_image_uri=task.docker_image,
@@ -74,6 +83,7 @@ def main(cfg: DictConfig):
             machine_type=cfg.infra.machine_type,
             accelerator_type=cfg.infra.accelerator_type,
             accelerator_count=cfg.infra.accelerator_count,
+            env=env,
         )
     ]
 
