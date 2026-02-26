@@ -33,14 +33,16 @@ task:
     - prod
     - task_manager
 
+  # Pass the checkpoint path via env var to avoid Hydra override grammar
+  # issues with '=' in the checkpoint filename (epoch=80-val/mAP=0.4563).
+  env:
+    - name: CKPT_PATH
+      value: "/gcs/deep-ego-model-training/ego-training-data/basketball-data/logs/basketball-detector-training-rfdetr-small/20260218_161423/checkpoints/epoch=80-val/mAP=0.4563.ckpt"
+
   data_assets:
     train_data: null
     val_data: null
     test_data: null
-    checkpoint:
-      bucket_name: deep-ego-model-training
-      relative_path: "ego-training-data/basketball-data/logs/basketball-detector-training-rfdetr-small/20260218_161423/checkpoints/epoch=80-val/mAP=0.4563.ckpt"
-      param_name: task.checkpoint_path
     output_data:
       bucket_name: deep-ego-model-training
       relative_path: ego-training-data/basketball-data/eval/onnx-export
