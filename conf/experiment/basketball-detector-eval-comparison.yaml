@@ -53,12 +53,8 @@ task:
       param_name: task.test_dir
     onnx_model:
       bucket_name: deep-ego-model-training
-      relative_path: ego-training-data/basketball-data/eval/onnx-export/model.onnx
+      relative_path: ego-training-data/basketball-data/eval/onnx-export/basketball-detector-export-onnx/20260226_183626/model.onnx
       param_name: task.onnx_model_path
-    label_mapping:
-      bucket_name: deep-ego-model-training
-      relative_path: ego-training-data/basketball-data/eval/onnx-export/labels_mapping.json
-      param_name: task.label_mapping_path
     output_data:
       bucket_name: deep-ego-model-training
       relative_path: ego-training-data/basketball-data/eval/comparison
