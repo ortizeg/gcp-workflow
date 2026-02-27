@@ -65,5 +65,6 @@ task:
     task.run_gemini=true \
     task.run_smolvlm2=true \
     task.run_rfdetr=true \
+    task.gemini_model_name=gemini-2.5-pro \
     task.rfdetr_input_size=560 \
     task.rfdetr_confidence_threshold=0.01"
