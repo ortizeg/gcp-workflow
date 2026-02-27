@@ -1,0 +1,58 @@
+# @package _global_
+# Hyperparameter sweep for SmolVLM2 LoRA jersey classifier.
+#
+# Only sweeps confidence_threshold (VLM handles its own preprocessing).
+# Loads the LoRA fine-tuned checkpoint for inference.
+#
+# Usage:
+#   pixi run python main.py +experiment=jersey-ocr-sweep-vlm              # dry run
+#   pixi run python main.py +experiment=jersey-ocr-sweep-vlm infra.dry_run=false
+
+defaults:
+  - override /infra: vertex
+  - override /task: object_detection
+
+infra:
+  project: api-project-562713517696
+  service_account: 562713517696-compute@developer.gserviceaccount.com
+  job_name: jersey-ocr-sweep-vlm
+  staging_bucket: gs://deep-ego-model-training
+  location: us-east1
+  tensorboard_resource_name: null
+  machine_type: g2-standard-8
+  accelerator_type: NVIDIA_L4
+  accelerator_count: 1
+  dry_run: true
+
+task:
+  docker_image: us-docker.pkg.dev/api-project-562713517696/classifier-training/classifier-training:latest
+
+  entrypoint:
+    - pixi
+    - run
+    - "--environment"
+    - prod
+    - python
+    - scripts/sweep_eval.py
+
+  data_assets:
+    train_data: null
+    val_data: null
+    test_data: null
+    data_root:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/jersey-sweep/crops
+      param_name: --data-root
+    vlm_labels:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/jersey-sweep/models/jersey-ocr-best/labels_mapping.json
+      param_name: --vlm-labels-mapping
+    output_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/classifier-training/sweep-results
+      param_name: --output-dir
+
+  overrides: "--method vlm \
+    --split valid \
+    --lora-checkpoint /gcs/deep-ego-model-training/ego-training-data/jersey-sweep/models/smolvlm2-lora/best.ckpt \
+    --vlm-batch-size 4"
