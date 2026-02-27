@@ -20,8 +20,8 @@ infra:
   staging_bucket: gs://deep-ego-model-training
   location: us-east1
   tensorboard_resource_name: null
-  machine_type: n1-standard-4
-  accelerator_type: NVIDIA_TESLA_T4
+  machine_type: g2-standard-8
+  accelerator_type: NVIDIA_L4
   accelerator_count: 1
   dry_run: true
 
@@ -55,6 +55,10 @@ task:
       bucket_name: deep-ego-model-training
       relative_path: ego-training-data/basketball-data/eval/onnx-export/basketball-detector-export-onnx/20260226_183626/model.onnx
       param_name: task.onnx_model_path
+    label_mapping:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/eval/onnx-export/basketball-detector-export-onnx/20260226_183626/labels_mapping.json
+      param_name: task.label_mapping_path
     output_data:
       bucket_name: deep-ego-model-training
       relative_path: ego-training-data/basketball-data/eval/comparison
