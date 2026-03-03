@@ -1,0 +1,63 @@
+# @package _global_
+# Zero-shot detector evaluation: OmDet-Turbo, Grounding DINO, Florence-2, OWLv2.
+#
+# These models download weights from HuggingFace at runtime — no ONNX assets needed.
+# No Gemini API key needed (no VLM methods enabled).
+#
+# Usage:
+#   pixi run eval-basketball-zeroshot                           # dry run
+#   pixi run eval-basketball-zeroshot infra.dry_run=false       # submit
+
+defaults:
+  - override /infra: vertex
+  - override /task: object_detection
+
+infra:
+  project: api-project-562713517696
+  service_account: 562713517696-compute@developer.gserviceaccount.com
+  job_name: basketball-detector-eval-zeroshot
+  staging_bucket: gs://deep-ego-model-training
+  location: us-east1
+  tensorboard_resource_name: null
+  machine_type: g2-standard-8
+  accelerator_type: NVIDIA_L4
+  accelerator_count: 1
+  dry_run: true
+
+task:
+  docker_image: us-docker.pkg.dev/api-project-562713517696/object-detection-training/object-detection-training:latest
+
+  entrypoint:
+    - pixi
+    - run
+    - "--environment"
+    - prod
+    - task_manager
+
+  env: []
+
+  data_assets:
+    train_data: null
+    val_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/valid
+      param_name: task.val_dir
+    test_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/test
+      param_name: task.test_dir
+    output_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/eval/comparison-zeroshot
+      param_name: hydra.run.dir
+
+  overrides: "--config-name train_basketball_rfdetr \
+    task=eval_detection \
+    task.run_gemini=false \
+    task.run_smolvlm2=false \
+    task.run_rfdetr=false \
+    task.run_yolox=false \
+    task.run_omdet_turbo=true \
+    task.run_grounding_dino=true \
+    task.run_florence2=true \
+    task.run_owlv2=true"
