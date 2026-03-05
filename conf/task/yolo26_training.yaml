@@ -1,0 +1,28 @@
+defaults:
+  - _self_
+
+name: yolo26_training
+docker_image: us-docker.pkg.dev/api-project-562713517696/yolo26-basketball/yolo26-basketball:latest
+entrypoint:
+  - python
+  - scripts/train.py
+
+overrides: ""
+
+data_assets:
+    train_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/train
+      param_name: null
+    val_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/valid
+      param_name: null
+    test_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/test
+      param_name: null
+    output_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/logs/
+      param_name: null

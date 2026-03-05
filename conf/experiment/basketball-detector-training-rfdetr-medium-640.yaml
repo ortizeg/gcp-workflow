@@ -1,0 +1,61 @@
+# @package _global_
+# RF-DETR Medium training at 640x640 resolution.
+#
+# Upgrade from RF-DETR Small (61.2% mAP@50:95) — Medium has 1.6M more params.
+# Uses same class weights as the successful rfdetr-640 v3 run.
+#
+# Usage:
+#   pixi run train-basketball-player-rfdetr-medium                           # dry run
+#   pixi run train-basketball-player-rfdetr-medium infra.dry_run=false       # submit
+
+defaults:
+  - override /infra: vertex
+  - override /task: object_detection
+
+infra:
+  project: api-project-562713517696
+  service_account: 562713517696-compute@developer.gserviceaccount.com
+  job_name: basketball-detector-training-rfdetr-medium
+  staging_bucket: gs://deep-ego-model-training
+  location: us-east1
+  machine_type: g2-standard-8
+  accelerator_type: NVIDIA_L4
+
+task:
+  docker_image: us-docker.pkg.dev/api-project-562713517696/object-detection-training/object-detection-training:latest
+
+  data_assets:
+    train_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/train
+      param_name: data.train_path
+    val_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/valid
+      param_name: data.val_path
+    test_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/test
+      param_name: data.test_path
+    output_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/logs/
+      param_name: hydra.run.dir
+
+  overrides: "--config-name train_basketball_rfdetr \
+    models=rfdetr_medium \
+    input_height=640 \
+    input_width=640 \
+    models.resolution=640 \
+    models.positional_encoding_size=40 \
+    data.sampler.mode=manual \
+    +data.sampler.class_weights.player=0.1 \
+    +data.sampler.class_weights.number=0.1 \
+    +data.sampler.class_weights.referee=0.1 \
+    +data.sampler.class_weights.ball=0.5 \
+    +data.sampler.class_weights.ball-in-basket=0.5 \
+    +data.sampler.class_weights.rim=0.5 \
+    +data.sampler.class_weights.player-in-possession=40.0 \
+    +data.sampler.class_weights.player-jump-shot=50.0 \
+    +data.sampler.class_weights.player-layup-dunk=100.0 \
+    +data.sampler.class_weights.player-shot-block=50.0"

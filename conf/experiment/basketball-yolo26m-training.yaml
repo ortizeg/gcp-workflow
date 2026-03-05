@@ -1,0 +1,58 @@
+# @package _global_
+# YOLO26m training on basketball player detection dataset.
+#
+# Uses YOLO26m (medium) pretrained on COCO for fine-tuning.
+# Trained in separate repo to avoid AGPL contamination.
+#
+# Usage:
+#   pixi run train-basketball-yolo26m                           # dry run
+#   pixi run train-basketball-yolo26m infra.dry_run=false       # submit
+
+defaults:
+  - override /infra: vertex
+  - override /task: yolo26_training
+
+infra:
+  project: api-project-562713517696
+  service_account: 562713517696-compute@developer.gserviceaccount.com
+  job_name: basketball-yolo26m-training
+  staging_bucket: gs://deep-ego-model-training
+  location: us-east1
+  machine_type: g2-standard-8
+  accelerator_type: NVIDIA_L4
+
+task:
+  docker_image: us-docker.pkg.dev/api-project-562713517696/yolo26-basketball/yolo26-basketball:latest
+
+  entrypoint:
+    - python
+    - scripts/train.py
+
+  env:
+    - name: MODEL
+      value: yolo26m.pt
+    - name: EPOCHS
+      value: "300"
+    - name: IMGSZ
+      value: "640"
+    - name: BATCH
+      value: "-1"
+    - name: TRAIN_DIR
+      value: /gcs/deep-ego-model-training/ego-training-data/basketball-data/basketball-player-detection-3/train
+    - name: VAL_DIR
+      value: /gcs/deep-ego-model-training/ego-training-data/basketball-data/basketball-player-detection-3/valid
+    - name: TEST_DIR
+      value: /gcs/deep-ego-model-training/ego-training-data/basketball-data/basketball-player-detection-3/test
+    - name: OUTPUT_DIR
+      value: /gcs/deep-ego-model-training/ego-training-data/basketball-data/logs
+
+  data_assets:
+    train_data: null
+    val_data: null
+    test_data: null
+    output_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/logs/
+      param_name: null
+
+  overrides: ""

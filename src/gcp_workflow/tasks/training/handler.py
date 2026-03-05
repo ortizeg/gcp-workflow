@@ -55,7 +55,10 @@ class TrainingTask(Task):
         # Append data asset overrides if param_name is specified.
         # Hydra requires single-quoting values that contain '=' signs
         # (e.g. checkpoint paths like epoch=80-val/mAP=0.4563.ckpt).
+        # Skip assets with null param_name (e.g. env-var-only configs).
         for asset in self.data_assets:
+            if not asset.param_name:
+                continue
             path = asset.mount_path
             if "=" in path:
                 overrides.append(f"{asset.param_name}='{path}'")

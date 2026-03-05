@@ -25,7 +25,7 @@ def main(cfg: DictConfig):
     )
 
     # 2. Initialize Task Handler
-    if cfg.task.name == "object_detection":
+    if cfg.task.name in ("object_detection", "yolo26_training"):
         task = TrainingTask(cfg.task)
     else:
         raise NotImplementedError(f"Task {cfg.task.name} not implemented.")
