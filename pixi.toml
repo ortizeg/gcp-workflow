@@ -26,6 +26,7 @@ train-basketball-player-yolox-medium = "python main.py +experiment=basketball-de
 export-basketball-onnx-yolox-medium = "python main.py +experiment=basketball-detector-export-onnx-yolox-medium"
 eval-basketball-yolox-medium = "python main.py +experiment=basketball-detector-eval-yolox-medium"
 train-basketball-player-rfdetr-medium = "python main.py +experiment=basketball-detector-training-rfdetr-medium-640"
+train-basketball-rfdetr-medium-576 = "python main.py +experiment=basketball-detector-training-rfdetr-medium-576"
 export-basketball-onnx-rfdetr-medium = "python main.py +experiment=basketball-detector-export-onnx-rfdetr-medium"
 eval-basketball-rfdetr-medium = "python main.py +experiment=basketball-detector-eval-rfdetr-medium"
 train-basketball-yolo26s = "python main.py +experiment=basketball-yolo26s-training"
