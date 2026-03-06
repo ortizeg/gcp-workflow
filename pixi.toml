@@ -39,6 +39,8 @@ eval-basketball-yolo26m = "python main.py +experiment=basketball-eval-yolo26m"
 eval-basketball-rfdetr-medium-standalone = "python main.py +experiment=basketball-eval-rfdetr-medium-standalone"
 export-basketball-onnx-rfdetr-medium-576 = "python main.py +experiment=basketball-detector-export-onnx-rfdetr-medium-576"
 eval-basketball-rfdetr-medium-576 = "python main.py +experiment=basketball-eval-rfdetr-medium-576"
+export-basketball-onnx-rfdetr-medium-576-at-640 = "python main.py +experiment=basketball-detector-export-onnx-rfdetr-medium-576-at-640"
+eval-basketball-rfdetr-medium-576-at-640 = "python main.py +experiment=basketball-eval-rfdetr-medium-576-at-640"
 
 [dependencies]
 python = "3.9.*"
