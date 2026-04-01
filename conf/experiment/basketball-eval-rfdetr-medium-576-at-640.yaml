@@ -1,0 +1,66 @@
+# @package _global_
+# Evaluate RF-DETR Medium (trained at 576) at 640 input size for fair
+# comparison with RF-DETR Small v3 (trained at 512, evaluated at 640).
+#
+# Usage:
+#   pixi run eval-basketball-rfdetr-medium-576-at-640                      # dry run
+#   pixi run eval-basketball-rfdetr-medium-576-at-640 infra.dry_run=false  # submit
+
+defaults:
+  - override /infra: vertex
+  - override /task: object_detection
+
+infra:
+  project: api-project-562713517696
+  service_account: 562713517696-compute@developer.gserviceaccount.com
+  job_name: basketball-eval-rfdetr-medium-576-at-640
+  staging_bucket: gs://deep-ego-model-training
+  location: us-east1
+  tensorboard_resource_name: null
+  machine_type: g2-standard-8
+  accelerator_type: NVIDIA_L4
+  accelerator_count: 1
+  dry_run: true
+
+task:
+  docker_image: us-docker.pkg.dev/api-project-562713517696/object-detection-training/object-detection-training:latest
+
+  entrypoint:
+    - pixi
+    - run
+    - "--environment"
+    - prod
+    - task_manager
+
+  env: []
+
+  data_assets:
+    train_data: null
+    val_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/valid
+      param_name: task.val_dir
+    test_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/test
+      param_name: task.test_dir
+    rfdetr_onnx_model:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/eval/onnx-export/basketball-detector-export-onnx-rfdetr-medium-576-at-640/20260305_223301/model.onnx
+      param_name: task.onnx_model_path
+    rfdetr_label_mapping:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/eval/onnx-export/basketball-detector-export-onnx-rfdetr-medium/20260305_150408/labels_mapping.json
+      param_name: task.label_mapping_path
+    output_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/eval/rfdetr-medium-576-at-640-eval
+      param_name: hydra.run.dir
+
+  overrides: "--config-name train_basketball_rfdetr \
+    task=eval_detection \
+    task.run_gemini=false \
+    task.run_smolvlm2=false \
+    task.run_rfdetr=true \
+    task.run_yolo26=false \
+    task.rfdetr_input_size=640"

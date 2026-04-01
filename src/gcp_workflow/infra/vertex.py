@@ -75,15 +75,29 @@ class VertexClient:
         machine_type: str = "n1-standard-4",
         accelerator_type: str = "NVIDIA_TESLA_T4",
         accelerator_count: int = 1,
+        env: Optional[List[Dict[str, str]]] = None,
     ) -> Dict[str, Any]:
         """
         Creates a worker pool specification for the Vertex AI CustomJob.
         Note: GCS buckets are automatically mounted at /gcs/ by Vertex AI.
+
+        Args:
+            env: Optional list of environment variable dicts, each with
+                 "name" and "value" keys.  Resolved at submit time so
+                 secrets are never stored in config files.
         """
         # Note regarding GCS mounts:
         # Vertex AI automatically mounts GCS buckets at /gcs/<bucket_name>
         # provided the service account has permission.
         # We don't need to explicitly define mounts in the spec for standard GCS access.
+
+        container_spec: Dict[str, Any] = {
+            "image_uri": container_image_uri,
+            "command": command,
+            "args": args,
+        }
+        if env:
+            container_spec["env"] = env
 
         return {
             "machine_spec": {
@@ -92,9 +106,5 @@ class VertexClient:
                 "accelerator_count": accelerator_count,
             },
             "replica_count": 1,
-            "container_spec": {
-                "image_uri": container_image_uri,
-                "command": command,
-                "args": args,
-            },
+            "container_spec": container_spec,
         }

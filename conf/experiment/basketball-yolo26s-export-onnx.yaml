@@ -1,0 +1,47 @@
+# @package _global_
+# ONNX export of best YOLO26s checkpoint.
+#
+# NOTE: Update MODEL_PATH after training completes.
+#
+# Usage:
+#   pixi run export-basketball-yolo26s                            # dry run
+#   pixi run export-basketball-yolo26s infra.dry_run=false        # submit
+
+defaults:
+  - override /infra: vertex
+  - override /task: yolo26_training
+
+infra:
+  project: api-project-562713517696
+  service_account: 562713517696-compute@developer.gserviceaccount.com
+  job_name: basketball-yolo26s-export-onnx
+  staging_bucket: gs://deep-ego-model-training
+  location: us-east1
+  tensorboard_resource_name: null
+  machine_type: n1-standard-4
+  accelerator_type: NVIDIA_TESLA_T4
+  accelerator_count: 1
+  dry_run: true
+
+task:
+  docker_image: us-docker.pkg.dev/api-project-562713517696/yolo26-basketball/yolo26-basketball:latest
+
+  entrypoint:
+    - python
+    - scripts/export_onnx.py
+
+  env:
+    - name: MODEL_PATH
+      value: "/gcs/deep-ego-model-training/ego-training-data/basketball-data/logs/yolo26s-basketball-training/20260305_182211/best.pt"
+    - name: IMGSZ
+      value: "640"
+    - name: OUTPUT_DIR
+      value: /gcs/deep-ego-model-training/ego-training-data/basketball-data/eval/onnx-export/yolo26s
+
+  data_assets:
+    train_data: null
+    val_data: null
+    test_data: null
+    output_data: null
+
+  overrides: ""

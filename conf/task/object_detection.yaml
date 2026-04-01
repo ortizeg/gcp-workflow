@@ -6,7 +6,7 @@ docker_image: gcr.io/my-project/object-detection:latest
 entrypoint:
   - pixi
   - run
-  - train
+  - task_manager
 
 overrides: ""
 

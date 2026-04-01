@@ -1,0 +1,74 @@
+# @package _global_
+# Multi-method evaluation comparison: Gemini VLM vs SmolVLM2 vs RF-DETR.
+#
+# Requires GOOGLE_API_KEY env var set locally (resolved at submit time via
+# OmegaConf env resolver, never committed to git).
+#
+# Usage:
+#   export GOOGLE_API_KEY=<your-key>
+#   pixi run eval-basketball-comparison                           # dry run
+#   pixi run eval-basketball-comparison infra.dry_run=false       # submit
+
+defaults:
+  - override /infra: vertex
+  - override /task: object_detection
+
+infra:
+  project: api-project-562713517696
+  service_account: 562713517696-compute@developer.gserviceaccount.com
+  job_name: basketball-detector-eval-comparison
+  staging_bucket: gs://deep-ego-model-training
+  location: us-east1
+  tensorboard_resource_name: null
+  machine_type: g2-standard-8
+  accelerator_type: NVIDIA_L4
+  accelerator_count: 1
+  dry_run: true
+
+task:
+  docker_image: us-docker.pkg.dev/api-project-562713517696/object-detection-training/object-detection-training:latest
+
+  entrypoint:
+    - pixi
+    - run
+    - "--environment"
+    - prod
+    - task_manager
+
+  # Environment variables injected into the container at runtime.
+  # GOOGLE_API_KEY is resolved from the local environment at submit time.
+  env:
+    - name: GOOGLE_API_KEY
+      value: ${oc.env:GOOGLE_API_KEY}
+
+  data_assets:
+    train_data: null
+    val_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/valid
+      param_name: task.val_dir
+    test_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/basketball-player-detection-3/test
+      param_name: task.test_dir
+    onnx_model:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/eval/onnx-export/basketball-detector-export-onnx/20260226_183626/model.onnx
+      param_name: task.onnx_model_path
+    label_mapping:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/eval/onnx-export/basketball-detector-export-onnx/20260226_183626/labels_mapping.json
+      param_name: task.label_mapping_path
+    output_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/basketball-data/eval/comparison
+      param_name: hydra.run.dir
+
+  overrides: "--config-name train_basketball_rfdetr \
+    task=eval_detection \
+    task.run_gemini=true \
+    task.run_smolvlm2=false \
+    task.run_rfdetr=true \
+    task.gemini_model_name=gemini-2.5-pro \
+    task.rfdetr_input_size=512 \
+    task.rfdetr_confidence_threshold=0.01"

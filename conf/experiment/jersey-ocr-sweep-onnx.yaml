@@ -1,0 +1,65 @@
+# @package _global_
+# Hyperparameter sweep for ONNX ResNet18 jersey classifiers.
+#
+# Sweeps confidence_threshold, pad_ratio, resize_size, TTA mode,
+# sharpening, and CLAHE across two ONNX models:
+#   - jersey-ocr-best (original best model)
+#   - jersey-ocr-targeted-synth-ls (label-smoothing + targeted synth)
+#
+# Crops are pre-saved at pad_ratio=1.0; smaller pads are simulated
+# by center-cropping during eval.
+#
+# Usage:
+#   pixi run python main.py +experiment=jersey-ocr-sweep-onnx              # dry run
+#   pixi run python main.py +experiment=jersey-ocr-sweep-onnx infra.dry_run=false
+
+defaults:
+  - override /infra: vertex
+  - override /task: object_detection
+
+infra:
+  project: api-project-562713517696
+  service_account: 562713517696-compute@developer.gserviceaccount.com
+  job_name: jersey-ocr-sweep-onnx
+  staging_bucket: gs://deep-ego-model-training
+  location: us-east1
+  tensorboard_resource_name: null
+  machine_type: n1-standard-4
+  accelerator_type: NVIDIA_TESLA_T4
+  accelerator_count: 1
+  dry_run: true
+
+task:
+  docker_image: us-docker.pkg.dev/api-project-562713517696/classifier-training/classifier-training:latest
+
+  entrypoint:
+    - pixi
+    - run
+    - "--environment"
+    - prod
+    - python
+    - scripts/sweep_eval.py
+
+  data_assets:
+    train_data: null
+    val_data: null
+    test_data: null
+    data_root:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/jersey-sweep/crops
+      param_name: --data-root
+    output_data:
+      bucket_name: deep-ego-model-training
+      relative_path: ego-training-data/classifier-training/sweep-results
+      param_name: --output-dir
+
+  overrides: "--method onnx \
+    --split valid \
+    --max-pad-ratio 1.0 \
+    --model-paths \
+      /gcs/deep-ego-model-training/ego-training-data/jersey-sweep/models/jersey-ocr-best/model.onnx \
+      /gcs/deep-ego-model-training/ego-training-data/jersey-sweep/models/jersey-ocr-targeted-synth-ls.onnx \
+    --labels-mappings \
+      /gcs/deep-ego-model-training/ego-training-data/jersey-sweep/models/jersey-ocr-best/labels_mapping.json \
+      /gcs/deep-ego-model-training/ego-training-data/jersey-sweep/models/jersey-ocr-targeted-synth-ls-labels.json \
+    --model-names jersey-ocr-best jersey-ocr-targeted-synth-ls"

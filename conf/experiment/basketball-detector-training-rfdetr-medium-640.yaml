@@ -1,4 +1,12 @@
 # @package _global_
+# RF-DETR Medium training at 640x640 resolution.
+#
+# Upgrade from RF-DETR Small (61.2% mAP@50:95) — Medium has 1.6M more params.
+# Uses same class weights as the successful rfdetr-640 v3 run.
+#
+# Usage:
+#   pixi run train-basketball-player-rfdetr-medium                           # dry run
+#   pixi run train-basketball-player-rfdetr-medium infra.dry_run=false       # submit
 
 defaults:
   - override /infra: vertex
@@ -6,8 +14,8 @@ defaults:
 
 infra:
   project: api-project-562713517696
-  service_account: 562713517696-compute@developer.gserviceaccount.com # Compute Engine default
-  job_name: basketball-detector-training-rfdetr-small
+  service_account: 562713517696-compute@developer.gserviceaccount.com
+  job_name: basketball-detector-training-rfdetr-medium
   staging_bucket: gs://deep-ego-model-training
   location: us-east1
   machine_type: g2-standard-8
@@ -35,6 +43,11 @@ task:
       param_name: hydra.run.dir
 
   overrides: "--config-name train_basketball_rfdetr \
+    models=rfdetr_medium \
+    input_height=640 \
+    input_width=640 \
+    models.resolution=640 \
+    models.positional_encoding_size=40 \
     data.sampler.mode=manual \
     +data.sampler.class_weights.player=0.1 \
     +data.sampler.class_weights.number=0.1 \

@@ -1,5 +1,5 @@
 # @package _global_
-# ResNet18 + Focal Loss + default transforms (isolation: focal effect)
+# Augmentation sweep: BASELINE+ZOOMOUT - original baseline plus zoom-out
 
 defaults:
   - override /infra: vertex
@@ -8,9 +8,10 @@ defaults:
 infra:
   project: api-project-562713517696
   service_account: 562713517696-compute@developer.gserviceaccount.com
-  job_name: jersey-ocr-resnet18-focal-default
+  job_name: jersey-r18-aug-sweep-baseline-zoomout
   staging_bucket: gs://deep-ego-model-training
   location: us-east1
+  tensorboard_resource_name: null
   machine_type: g2-standard-8
   accelerator_type: NVIDIA_L4
 
@@ -18,6 +19,9 @@ task:
   docker_image: us-docker.pkg.dev/api-project-562713517696/classifier-training/classifier-training:latest
 
   data_assets:
+    train_data: null
+    val_data: null
+    test_data: null
     data_root:
       bucket_name: deep-ego-model-training
       relative_path: ego-training-data/basketball-jersey-numbers-ocr
@@ -28,6 +32,12 @@ task:
       param_name: hydra.run.dir
 
   overrides: "--config-name train_jersey_ocr_resnet18 \
-    model.loss_name=focal \
-    model.focal_gamma=2.0 \
-    transforms=default"
+    model=resnet18 \
+    model.loss_name=cross_entropy \
+    model.learning_rate=5e-4 \
+    model.label_smoothing=0.0 \
+    transforms=basketball_jersey_baseline_zoomout \
+    logging=none \
+    data.sampler.mode=disabled \
+    trainer.max_epochs=200 \
+    callbacks.early_stopping.patience=20"

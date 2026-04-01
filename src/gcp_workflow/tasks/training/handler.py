@@ -10,9 +10,11 @@ class TrainingTask(Task):
         self.cfg = cfg
         self._data_assets = []
 
-        # Parse data assets from config
+        # Parse data assets from config (skip null entries)
         if hasattr(cfg, "data_assets"):
             for name, asset_cfg in cfg.data_assets.items():
+                if asset_cfg is None:
+                    continue
                 self._data_assets.append(
                     DataAsset(
                         name=name,
@@ -50,8 +52,17 @@ class TrainingTask(Task):
             for key, value in self.cfg.params.items():
                 overrides.append(f"{key}={value}")
 
-        # Append data asset overrides if param_name is specified
+        # Append data asset overrides if param_name is specified.
+        # Hydra requires single-quoting values that contain '=' signs
+        # (e.g. checkpoint paths like epoch=80-val/mAP=0.4563.ckpt).
+        # Skip assets with null param_name (e.g. env-var-only configs).
         for asset in self.data_assets:
-            overrides.append(f"{asset.param_name}={asset.mount_path}")
+            if not asset.param_name:
+                continue
+            path = asset.mount_path
+            if "=" in path:
+                overrides.append(f"{asset.param_name}='{path}'")
+            else:
+                overrides.append(f"{asset.param_name}={path}")
 
         return overrides
